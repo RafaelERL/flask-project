@@ -4,7 +4,8 @@ from werkzeug.urls import url_parse
 from app import app, db
 from app.forms import LoginForm
 from app.forms import RegistrationForm
-from app.models import User
+from app.forms import CreateEventForm
+from app.models import User, Post
 
 @app.route('/')
 @app.route('/index')
@@ -58,3 +59,14 @@ def register():
         flash('Congratulations, you are now a registered user!')
         return redirect(url_for('login'))
     return render_template('register.html', title='Register', form=form)
+
+@app.route('/create', methods=['GET', 'POST'])
+def create():
+    form = CreateEventForm()
+    if form.validate_on_submit():
+        post = Post(name=form.name.data, category=form.category.data, place=form.place.data , address=form.address.data , timestamp=form.timestamp.data , timestamp_end=form.timestamp_end.data, method=form.method.data)
+        db.session.add(post)
+        db.session.commit()
+        flash('Congratulations, Event Created!')
+        return redirect(url_for('index'))
+    return render_template('create.html', title='Create Event', form=form)
