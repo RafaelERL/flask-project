@@ -6,6 +6,7 @@ from app.forms import LoginForm
 from app.forms import RegistrationForm
 from app.forms import CreateEventForm
 from app.models import User, Post
+from datetime import datetime
 
 @app.route('/')
 @app.route('/index')
@@ -29,9 +30,9 @@ def login():
         return redirect(url_for('index'))
     form = LoginForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(username=form.username.data).first()
+        user = User.query.filter_by(email=form.email.data).first()
         if user is None or not user.check_password(form.password.data):
-            flash('Invalid username or password')
+            flash('Invalid email or password')
             return redirect(url_for('login'))
         login_user(user, remember=form.remember_me.data)
         next_page = request.args.get('next')
@@ -64,9 +65,10 @@ def register():
 def create():
     form = CreateEventForm()
     if form.validate_on_submit():
-        post = Post(name=form.name.data, category=form.category.data, place=form.place.data , address=form.address.data , timestamp=form.timestamp.data , timestamp_end=form.timestamp_end.data, method=form.method.data)
+        post = Post(name=form.name.data, category=form.category.data, place=form.place.data , address=form.address.data , timestamp=form.timestamp.data , timestamp_end=form.timestamp_end.data, method=form.method.data, creation = datetime.now())
         db.session.add(post)
         db.session.commit()
         flash('Congratulations, Event Created!')
         return redirect(url_for('index'))
     return render_template('create.html', title='Create Event', form=form)
+

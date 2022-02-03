@@ -1,4 +1,5 @@
 from datetime import datetime
+from re import X
 from app import db, login
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -11,7 +12,7 @@ class User(UserMixin, db.Model):
     posts = db.relationship('Post', backref='author', lazy='dynamic')
 
     def __repr__(self):
-        return '<User {}>'.format(self.username)
+        return '<User {}>'.format(self.email)
     
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -32,9 +33,13 @@ class Post(db.Model):
     timestamp = db.Column(db.DateTime, index=True)
     timestamp_end = db.Column(db.DateTime, index=True)
     method = db.Column(db.String(160))
+    creation = db.Column(db.DateTime, index=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
     def __repr__(self):
         return '<Post {}>'.format(self.body)
 
+    def __events__(self):
+        posts = Post.query.filter_by(user_id=self.id).order_by(Post.creation.desc())
+        return posts
 
